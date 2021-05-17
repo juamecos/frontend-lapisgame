@@ -1,0 +1,9 @@
+{
+  "lng": "cs",
+  "title": "Registrovat",
+  "form": {
+    "userName": {
+      "placeholder": "Uživatelské jméno"
+    }
+  }
+}

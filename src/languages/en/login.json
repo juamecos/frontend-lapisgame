@@ -1,0 +1,9 @@
+{
+  "lng": "en",
+  "title": "Login",
+  "form": {
+    "email": {
+      "placeholder": "Email"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+query Users {
+  users {
+    status
+    message
+    users {
+      id
+      userName
+      name
+      lastname
+      email
+      password
+      registerDate
+      avatar
+      role
+    }
+  }
+}

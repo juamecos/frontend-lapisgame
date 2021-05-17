@@ -1,0 +1,9 @@
+{
+  "lng": "en",
+  "title": "Iniciar sesión",
+  "form": {
+    "email": {
+      "placeholder": "Email"
+    }
+  }
+}

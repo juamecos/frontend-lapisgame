@@ -1,0 +1,9 @@
+{
+  "lng": "en",
+  "title": "Register",
+  "form": {
+    "userName": {
+      "placeholder": "usermame"
+    }
+  }
+}

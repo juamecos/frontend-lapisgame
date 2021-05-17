@@ -1,0 +1,9 @@
+{
+  "lng": "en",
+  "title": "Přihlásit se",
+  "form": {
+    "email": {
+      "placeholder": "Email"
+    }
+  }
+}
