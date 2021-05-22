@@ -1,5 +1,5 @@
 import {StackScreenProps} from '@react-navigation/stack';
-import {Formik} from 'formik';
+import {Formik, Field} from 'formik';
 import * as yup from 'yup';
 import React, {useEffect} from 'react';
 import {
@@ -9,40 +9,72 @@ import {
   Platform,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import Logo from '../components/Logo';
 import {useTheme} from '@react-navigation/native';
 import {useLoginMutation} from '../generated/graphql';
 import {useTranslation} from 'react-i18next';
+import CustomInput from '../components/forms/CustomInput';
+import {getToken, storeToken, storeRefreshToken} from '../utils/tokens';
 
 interface Props extends StackScreenProps<any, any> {}
 
 const LoginScreen = ({navigation}: Props) => {
-  const {colors, secondaryColor, tertiaryColor, formError} = useTheme();
-  const [loginMutation, {data, loading, error}] = useLoginMutation(); //TODO backend change status to false when password in incorrec
+  const {
+    // colors,
+    // secondaryColor,
+    // tertiaryColor,
+    // formError,
+    screenContainer,
+    formContainer,
+  } = useTheme();
+  const [loginMutation, {data, loading, error}] = useLoginMutation();
   const {t} = useTranslation('login');
+
   useEffect(() => {
-    if (data?.login?.status && data.login.token !== null) {
-      navigation.navigate('UsersScreen');
+    const token = getToken();
+    console.log(token);
+  }, []);
+  useEffect(() => {
+    if (
+      data?.login?.status &&
+      data?.login?.token !== null &&
+      data?.login?.token !== undefined &&
+      data?.login?.refreshToken !== null &&
+      data?.login?.refreshToken !== undefined
+    ) {
+      const accessToken = data.login.token;
+      const refreshToken = data.login.refreshToken;
+      console.log(accessToken);
+
+      storeToken(accessToken);
+
+      storeRefreshToken(refreshToken);
+
+      navigation.navigate('UserScreen');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   if (loading) return <Text>Loading ...</Text>;
+
+  if (error) return <Text> Something went wrong {error}</Text>;
 
   const initialValues = {
     email: '',
     password: '',
   };
+
   return (
-    <Text>
+    <>
       {/* <Background /> */}
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View>
+        <View style={screenContainer}>
           <Logo />
           {!data?.login?.status && <Text>{data?.login?.message}</Text>}
           <Text>{t('title')}</Text>
@@ -54,76 +86,92 @@ const LoginScreen = ({navigation}: Props) => {
                   variables: {email: values.email, password: values.password},
                 });
                 Keyboard.dismiss();
-              } catch (error) {}
+                // eslint-disable-next-line no-catch-shadow
+              } catch (err) {
+                console.log(err);
+              }
             }}
             validationSchema={yup.object().shape({
-              email: yup.string().email().required(),
+              email: yup
+                .string()
+                .email(t('form.email.error.valid'))
+                .required(t('form.email.error.required')),
               password: yup
                 .string()
-                .min(4)
-                .max(10, 'Password should not excced 10 chars.')
-                .required(),
+                .min(4, t('form.passwword.error.min'))
+                .max(16, t('form.passwword.error.max'))
+                .required(t('form.passwword.error.required')),
             })}>
-            {({
-              values,
-              handleChange,
-              errors,
-              setFieldTouched,
-              touched,
-              isValid,
-              handleSubmit,
-            }) => (
-              <View style={styles.formContainer}>
-                <TextInput
-                  value={values.email}
-                  style={styles.inputStyle}
-                  onChangeText={handleChange('email')}
-                  onBlur={() => setFieldTouched('email')}
+            {({isValid, handleSubmit}) => (
+              <View style={formContainer}>
+                <Field
+                  component={CustomInput}
+                  name="email"
                   placeholder={t('form.email.placeholder')}
-                  autoCapitalize="none"
                   keyboardType="email-address"
                 />
-                {touched.email && errors.email && (
-                  <Text style={{fontSize: 12, color: tertiaryColor}}>
-                    {errors.email}
-                  </Text>
-                )}
-                <TextInput
-                  value={values.password}
-                  style={styles.inputStyle}
-                  onChangeText={handleChange('password')}
-                  placeholder="Password"
-                  onBlur={() => setFieldTouched('password')}
-                  secureTextEntry={true}
+                <Field
+                  component={CustomInput}
+                  name="password"
+                  placeholder={t('form.passwword.placeholder')}
+                  keyboardType="email-address"
                 />
-                {touched.password && errors.password && (
-                  <Text style={{fontSize: 12, color: formError}}>
-                    {errors.password}
-                  </Text>
-                )}
-                <Button
-                  color="#3740FE"
-                  title="Login"
-                  disabled={!isValid}
-                  onPress={handleSubmit}
-                />
+                <View style={styles.formButton}>
+                  <Button
+                    color="#3740FE"
+                    title={t('form.button')}
+                    disabled={!isValid}
+                    onPress={handleSubmit}
+                  />
+                </View>
               </View>
             )}
           </Formik>
           <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => navigation.navigate('LoginScreen')}>
-            <Text>Don't have an account. Register</Text>
+            onPress={() => navigation.navigate('RegisterScreen')}>
+            <Text style={styles.littleText}>{t('register')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('ForgotScreen')}>
+            <Text style={styles.littleText}>{t('forgot')}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </Text>
+    </>
   );
 };
 
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  formContainer: {},
-  inputStyle: {},
+  screenContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 20,
+  },
+  formContainer: {
+    borderWidth: 1,
+    width: 250,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderRadius: 20,
+  },
+  inputStyle: {
+    borderWidth: 1,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  formErrorText: {
+    fontSize: 14,
+  },
+  formButton: {
+    marginTop: 20,
+  },
+  littleText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
 });

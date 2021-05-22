@@ -9,9 +9,10 @@ import {
   Button,
   Keyboard,
   View,
+  ActivityIndicator,
 } from 'react-native';
 
-import {Formik} from 'formik';
+import {Formik, Field} from 'formik';
 import * as yup from 'yup';
 import {Link, useTheme} from '@react-navigation/native';
 // import Background from '../components/Background';
@@ -22,6 +23,7 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useAddUserMutation} from '../generated/graphql';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {useTranslation} from 'react-i18next';
+import CustomInput from '../components/forms/CustomInput';
 
 interface Props extends StackScreenProps<any, any> {}
 
@@ -34,10 +36,16 @@ const RegisterScreen = ({navigation}: Props) => {
     userName: '',
     email: '',
     password: '',
+    passwordConfirm: '',
   };
 
   if (loading) {
-    return <Text>Loading ... </Text>;
+    return (
+      <View style={styles.screenContainer}>
+        <ActivityIndicator color={colors.primary} size={50} />
+        <Text>Loading ... </Text>
+      </View>
+    );
   }
 
   return (
@@ -47,17 +55,30 @@ const RegisterScreen = ({navigation}: Props) => {
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.screenContainer}>
+          <Logo />
+
           <Text>{t('title')}</Text>
 
           {!data?.register?.status && <Text>{data?.register?.message}</Text>}
+
           <Formik
             initialValues={initialValues}
-            onSubmit={async values => {
+            onSubmit={async ({userName, email, password}) => {
               try {
-                await addUserMutation({variables: {user: values}});
+                await addUserMutation({
+                  variables: {
+                    user: {
+                      userName,
+                      email,
+                      password,
+                    },
+                  },
+                });
                 Keyboard.dismiss();
                 navigation.navigate('LoginScreen');
-              } catch (error) {}
+              } catch (err) {
+                console.log(err);
+              }
             }}
             validationSchema={yup.object().shape({
               userName: yup.string().required('Please, provide a username!'),
@@ -66,6 +87,10 @@ const RegisterScreen = ({navigation}: Props) => {
                 .string()
                 .min(4)
                 .max(10, 'Password should not excced 10 chars.')
+                .required(),
+              confirmPassword: yup
+                .string()
+                .oneOf([yup.ref('password'), null], 'Passwords must match')
                 .required(),
             })}>
             {({
@@ -76,54 +101,40 @@ const RegisterScreen = ({navigation}: Props) => {
               touched,
               isValid,
               handleSubmit,
+              isSubmitting,
             }) => (
               <View style={styles.formContainer}>
-                <Logo />
-                <TextInput
-                  value={values.userName}
-                  style={styles.inputStyle}
-                  onChangeText={handleChange('userName')}
-                  onBlur={() => setFieldTouched('userName')}
-                  autoCapitalize="none"
-                  placeholder={t('form.userName.placeholder')}
+                <Field
+                  component={CustomInput}
+                  name="userName"
+                  placeholder="Username"
                 />
-                {touched.userName && errors.userName && (
-                  <Text style={{fontSize: 12, color: tertiaryColor}}>
-                    {errors.userName}
-                  </Text>
-                )}
-                <TextInput
-                  value={values.email}
-                  style={styles.inputStyle}
-                  onChangeText={handleChange('email')}
-                  onBlur={() => setFieldTouched('email')}
-                  placeholder="E-mail"
-                  autoCapitalize="none"
+                <Field
+                  component={CustomInput}
+                  name="email"
+                  placeholder="Email address"
                   keyboardType="email-address"
                 />
-                {touched.email && errors.email && (
-                  <Text style={{fontSize: 12, color: tertiaryColor}}>
-                    {errors.email}
-                  </Text>
-                )}
-                <TextInput
-                  value={values.password}
-                  style={styles.inputStyle}
-                  onChangeText={handleChange('password')}
+                <Field
+                  component={CustomInput}
+                  name="password"
                   placeholder="Password"
-                  onBlur={() => setFieldTouched('password')}
-                  secureTextEntry={true}
+                  secureTextEntry
                 />
-                {touched.password && errors.password && (
-                  <Text style={styles.formErrorText}>{errors.password}</Text>
-                )}
-                <Button
-                  style={{...styles.formButton}}
-                  color={colors.primary}
-                  title="Submit"
-                  disabled={!isValid}
-                  onPress={handleSubmit}
+                <Field
+                  component={CustomInput}
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  secureTextEntry
                 />
+                <View style={styles.formButton}>
+                  <Button
+                    color={secondaryColor}
+                    title="Submit"
+                    disabled={!isValid || isSubmitting}
+                    onPress={handleSubmit}
+                  />
+                </View>
               </View>
             )}
           </Formik>

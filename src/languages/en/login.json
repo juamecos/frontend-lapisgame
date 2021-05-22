@@ -3,7 +3,18 @@
   "title": "Login",
   "form": {
     "email": {
-      "placeholder": "Email"
-    }
-  }
+      "placeholder": "Email",
+      "error.valid": "Should be a valid email",
+      "error.required": "Email is required"
+    },
+    "passwword": {
+      "placeholder": "Password",
+      "error.min": "Should be longer than 4 characters",
+      "error.max": "Should not excced 16 chars",
+      "error.required": "Password is required"
+    },
+    "button": "Login"
+  },
+  "register": "Don't have an account? Register",
+  "forgot": "Forgot password"
 }

@@ -1,9 +1,20 @@
 {
-  "lng": "en",
+  "lng": "es",
   "title": "Iniciar sesión",
   "form": {
     "email": {
-      "placeholder": "Email"
-    }
-  }
+      "placeholder": "Email",
+      "error.valid": "El email es invalido",
+      "error.required": "El email es obligatorio"
+    },
+    "passwword": {
+      "placeholder": "Contraseña",
+      "error.min": "Debe tener menos de 4 carácteres",
+      "error.max": "Debe tener más de 16 caracteres",
+      "error.required": "La contraseña es obligatoria"
+    },
+    "button": "Iniciar session"
+  },
+  "register": "No tienes una cuenta. Regístrate",
+  "forgot": "¿Olvidaste tu contraseña?"
 }

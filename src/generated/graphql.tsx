@@ -55,6 +55,8 @@ export type ResultLogin = Result & {
   message: Scalars['String'];
   /** Access token from logedin user */
   token?: Maybe<Scalars['String']>;
+  refreshToken?: Maybe<Scalars['String']>;
+  count?: Maybe<Scalars['Int']>;
 };
 
 export type ResultUser = Result & {
@@ -93,6 +95,7 @@ export type User = {
   registerDate?: Maybe<Scalars['String']>;
   avatar?: Maybe<Scalars['String']>;
   role?: Maybe<Role>;
+  count?: Maybe<Scalars['Int']>;
 };
 
 /** Input to add user data for registration */
@@ -125,7 +128,7 @@ export type LoginMutation = {__typename?: 'Mutation'} & {
   login?: Maybe<
     {__typename?: 'ResultLogin'} & Pick<
       ResultLogin,
-      'status' | 'message' | 'token'
+      'status' | 'message' | 'token' | 'refreshToken' | 'count'
     >
   >;
 };
@@ -144,6 +147,28 @@ export type UsersQuery = {__typename?: 'Query'} & {
             | 'lastname'
             | 'email'
             | 'password'
+            | 'registerDate'
+            | 'avatar'
+            | 'role'
+          >
+        >;
+      }
+  >;
+};
+
+export type MeQueryVariables = Exact<{[key: string]: never}>;
+
+export type MeQuery = {__typename?: 'Query'} & {
+  me?: Maybe<
+    {__typename?: 'ResultUser'} & Pick<ResultUser, 'status' | 'message'> & {
+        user?: Maybe<
+          {__typename?: 'User'} & Pick<
+            User,
+            | 'id'
+            | 'userName'
+            | 'name'
+            | 'lastname'
+            | 'email'
             | 'registerDate'
             | 'avatar'
             | 'role'
@@ -212,6 +237,8 @@ export const LoginDocument = gql`
       status
       message
       token
+      refreshToken
+      count
     }
   }
 `;
@@ -315,3 +342,52 @@ export type UsersQueryResult = Apollo.QueryResult<
   UsersQuery,
   UsersQueryVariables
 >;
+export const MeDocument = gql`
+  query Me {
+    me {
+      status
+      message
+      user {
+        id
+        userName
+        name
+        lastname
+        email
+        registerDate
+        avatar
+        role
+      }
+    }
+  }
+`;
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(
+  baseOptions?: Apollo.QueryHookOptions<MeQuery, MeQueryVariables>,
+) {
+  const options = {...defaultOptions, ...baseOptions};
+  return Apollo.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+}
+export function useMeLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<MeQuery, MeQueryVariables>,
+) {
+  const options = {...defaultOptions, ...baseOptions};
+  return Apollo.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+}
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;

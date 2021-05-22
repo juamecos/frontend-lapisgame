@@ -6,6 +6,8 @@ import {useUsersQuery} from '../generated/graphql';
 const Users = () => {
   const {data, loading, error} = useUsersQuery();
 
+  useEffect(() => {}, []);
+
   return (
     <View>
       <Text>Users</Text>

@@ -1,9 +1,20 @@
 {
-  "lng": "en",
-  "title": "Přihlásit se",
+  "lng": "cs",
+  "title": "Přihlášení",
   "form": {
     "email": {
-      "placeholder": "Email"
-    }
-  }
+      "placeholder": "E-mail",
+      "error.valid": "Měl by to být platný e-mail",
+      "error.required": "E-mail je vyžadován"
+    },
+    "passwword": {
+      "placeholder": "Heslo",
+      "error.min": "Mělo by být delší než 4 znaky",
+      "error.max": "Nemělo by přesáhnout 16 znaků",
+      "error.required": "Heslo je vyžadováno"
+    },
+    "button": "Přihlásit se"
+  },
+  "register": "Nemáš účet? Registrovat",
+  "forgot": "Zapomněli jste heslo?"
 }

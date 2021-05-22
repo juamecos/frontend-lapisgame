@@ -15,3 +15,20 @@ query Users {
     }
   }
 }
+
+query Me {
+  me {
+    status
+    message
+    user {
+      id
+      userName
+      name
+      lastname
+      email
+      registerDate
+      avatar
+      role
+    }
+  }
+}
